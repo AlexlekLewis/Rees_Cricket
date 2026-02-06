@@ -1598,8 +1598,18 @@
         const heroContent = document.querySelector(".hero-content");
 
         // Configuration
-        const frameCount = 192; // Total extracted frames
-        const currentFrame = index => `images/hero-sequence/${(index + 1).toString().padStart(4, '0')}.jpg`;
+        const totalFrames = 192; // Total available frames
+        // Mobile Optimization: Load fewer frames on small screens
+        const isMobile = window.innerWidth < 768;
+        const frameStep = isMobile ? 3 : 1; // Skip frames on mobile to reduce load
+        const frameCount = Math.floor(totalFrames / frameStep);
+
+        const currentFrame = index => {
+            const frameIndex = (index * frameStep) + 1;
+            // Ensure we don't exceed total frames
+            const safeIndex = Math.min(frameIndex, totalFrames);
+            return `images/hero-sequence/${safeIndex.toString().padStart(4, '0')}.jpg`;
+        };
 
         const images = [];
         const hero = {
@@ -1613,7 +1623,10 @@
             render();
         }
 
-        window.addEventListener("resize", resizeCanvas);
+        window.addEventListener("resize", () => {
+            resizeCanvas();
+            // Optional: could reload images if crossing breakpoint, but simpler to keep initial load
+        });
 
         // Preload images
         const preloadImages = () => {
